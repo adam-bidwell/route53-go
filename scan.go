@@ -27,14 +27,20 @@ func scan (ip string) {
 		exitErrorf("Unable to get hosted zones list, %v.", err)
 	}
 	for _, v := range l.HostedZones {
-		//Populate
-		fmt.Printf("Scanning %s...\n", *v.Name)
+		// fmt.Printf("Scanning %s...\n", *v.Name)
 		r, err := svc.ListResourceRecordSets(&route53.ListResourceRecordSetsInput{ HostedZoneId: v.Id })
 		if err != nil {
 			exitErrorf("Unable to get hosted zones list, %v.", err)
 		}
-		for _, record := range r.ResourceRecordSets {
-			fmt.Printf("%v\n", record)
+		for _, resource := range r.ResourceRecordSets {
+			if *resource.Type == "A" {
+				for _, record := range resource.ResourceRecords {
+					ipAddress := *record.Value
+					if ipAddress == ip {
+						fmt.Printf("%s %v\n", *resource.Name, *record.Value)
+					}
+				}
+			}
 		}
 	}
 }
